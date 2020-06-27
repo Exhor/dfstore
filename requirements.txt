@@ -1,10 +1,10 @@
 # install_requires
 fastapi
-python-`multipart
-pandas`
-numpy`
-feath`er-format
-uvicorn`
+python-multipart
+pandas
+numpy
+feather-format
+uvicorn
 
 # tests require
 black
