@@ -1,0 +1,16 @@
+# install_requires
+fastapi
+python-`multipart
+pandas`
+numpy`
+feath`er-format
+uvicorn`
+
+# tests require
+black
+pylint
+pytest
+mypy
+isort
+coverage
+requests
