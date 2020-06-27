@@ -26,12 +26,13 @@ def make_app():
         print(f"Received file {file.filename}")
         df = pd.read_csv(file.file)
         dataset_file = _dataset_file(file.filename)
+        dataset_file.parent.mkdir(parents=True, exist_ok=True)
         feather.write_dataframe(df=df, dest=dataset_file)
 
     @app.get("/datasets/csv")
     async def dataset_slice(
         name: str,
-        column_names: typing.List[str] = Query(None),
+        columns: typing.List[str] = Query(None),
         index_col: str = None,
         min_index: int = None,
         max_index: int = None,
@@ -39,7 +40,7 @@ def make_app():
         """ Returns pandas.DataFrame.to_dict() for the given dataset
         """
         dataset_file = _dataset_file(name)
-        df = feather.read_dataframe(dataset_file, columns=column_names)
+        df = feather.read_dataframe(dataset_file, columns=columns)
         if index_col:
             assert df[index_col].dtype.kind in "iuf", "Index col must be integer/float"
             df = df[df[index_col].between(min_index, max_index)]

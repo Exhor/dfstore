@@ -45,7 +45,7 @@ def test_upload_and_download_returns_original_data():
     min_index = 1
     max_index = 3
     r = client.get(
-        f"datasets/csv?name={filename}&column_names=index&column_names=text&index_col=index&min_index={min_index}&max_index={max_index}"
+        f"datasets/csv?name={filename}&columns=index&columns=text&index_col=index&min_index={min_index}&max_index={max_index}"
     )
 
     assert r.status_code == 200, f"Expected 200. Got {r.json()}"

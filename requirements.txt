@@ -6,6 +6,9 @@ numpy
 feather-format
 uvicorn
 
+# deployment
+gunicorn
+
 # tests require
 black
 pylint
