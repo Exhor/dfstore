@@ -38,9 +38,7 @@ def e2e(httpclient, url=""):
 
     # get slice
     cols = ["t", "number"]
-    sliced_df = c.get(
-        name=name, columns=cols, index_col="t", min_index=2, max_index=4
-    )
+    sliced_df = c.get(name=name, columns=cols, index_col="t", min_index=2, max_index=4)
     pd.testing.assert_frame_equal(sliced_df, df[cols].iloc[2:4].reset_index(drop=True))
 
     # delete
