@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from fastapi.testclient import TestClient
 
-from src.client import FSClient
+from src.client import DFStoreClient
 from src.server import make_app
 from tests.e2e import e2e
 
@@ -24,7 +24,7 @@ def make_awkward_data(nrows=100, ncols=5):
 
 def test_upload_and_download_awkward_data_returns_original_data_with_text_and_nans():
     app = make_app()
-    client = FSClient(httpclient=TestClient(app), base_url="")
+    client = DFStoreClient(httpclient=TestClient(app), base_url="")
     df = make_awkward_data(nrows=5)
     filename = "upload.csv"
 

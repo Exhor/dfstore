@@ -3,14 +3,14 @@ from time import sleep
 import numpy as np
 import pandas as pd
 
-from src.client import FSClient
+from src.client import DFStoreClient
 
 
 def e2e(httpclient, url=""):
     """ Runs e2e tests against a httpclient.
     `httpclient` can be `requests` or fastapi's TestClient()
     """
-    c = FSClient(httpclient=httpclient, base_url=url)
+    c = DFStoreClient(httpclient=httpclient, base_url=url)
 
     # wait 5 seconds for ready
     for attempt in range(20):

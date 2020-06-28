@@ -5,7 +5,7 @@ import pandas as pd
 from requests import Response
 
 
-class FSClient:
+class DFStoreClient:
     def __init__(self, httpclient: Any, base_url: str) -> None:
         """
         :param httpclient: either `requests` or `fastapi.TestClient`, or any httpclient
