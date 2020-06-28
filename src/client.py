@@ -1,11 +1,12 @@
 import io
-from typing import List
+from typing import Any, List, Optional
 
 import pandas as pd
+from requests import Response
 
 
 class FSClient:
-    def __init__(self, httpclient, base_url):
+    def __init__(self, httpclient: Any, base_url: str) -> None:
         """
         :param httpclient: either `requests` or `fastapi.TestClient`, or any httpclient
             capable of the same interfaces: get, put, etc.
@@ -17,9 +18,10 @@ class FSClient:
 
     def all_datasets(self) -> List[str]:
         """ :returns: list of all datasets names """
-        return self._get("datasets").json()
+        dataset_list: List[str] = self._get("datasets").json()
+        return dataset_list
 
-    def delete(self, name: str):
+    def delete(self, name: str) -> None:
         r = self.c.delete(self.url + f"datasets?name={name}")
         _assert_status_code_200(r)
 
@@ -32,8 +34,13 @@ class FSClient:
         _assert_status_code_200(r)
 
     def get(
-        self, name: str, columns=None, index_col=None, min_index=None, max_index=None
-    ):
+        self,
+        name: str,
+        columns: Optional[List[str]] = None,
+        index_col: Optional[str] = None,
+        min_index: Optional[int] = None,
+        max_index: Optional[int] = None,
+    ) -> pd.DataFrame:
         """ Get a slice of a dataset as a pandas DataFrame """
         q = f"datasets/csv?name={name}"
         if columns:
@@ -49,11 +56,11 @@ class FSClient:
         r = self._get(q)
         return pd.read_csv(io.StringIO(str(r.content, "utf-8")))
 
-    def _get(self, query):
+    def _get(self, query: str) -> Any:
         r = self.c.get(self.url + query)
         _assert_status_code_200(r)
         return r
 
 
-def _assert_status_code_200(r) -> None:
+def _assert_status_code_200(r: Response) -> None:
     assert r.status_code == 200, r.json()

@@ -1,7 +1,7 @@
 import io
 import os
 import pathlib
-import typing
+from typing import List, Optional
 
 import feather
 import pandas as pd
@@ -10,33 +10,33 @@ from fastapi import FastAPI, File, Query, UploadFile
 from fastapi.responses import StreamingResponse
 
 
-def make_app():
+def make_app() -> FastAPI:
     app = FastAPI()
 
-    def _dataset_file(filename):
+    def _dataset_file(filename: str) -> pathlib.Path:
         root = os.getenv("FILESTORE_FOLDER", str(pathlib.Path.home() / "filestore"))
         return pathlib.Path(root) / filename
 
     @app.get("/")
-    def get():
+    def get() -> str:
         return "Hi, Im FeatherStore :)"
 
     @app.post("/datasets/csv")
-    async def upload_dataset_file(file: UploadFile = File(...)):
+    async def upload_dataset_file(file: UploadFile = File(...)) -> None:
         print(f"Received file {file.filename}")
         df = pd.read_csv(file.file)
         dataset_file = _dataset_file(file.filename)
         dataset_file.parent.mkdir(parents=True, exist_ok=True)
-        feather.write_dataframe(df=df, dest=dataset_file)
+        feather.write_dataframe(df=df, dest=str(dataset_file))
 
     @app.get("/datasets/csv")
     async def dataset_slice(
         name: str,
-        columns: typing.List[str] = Query(None),
-        index_col: str = None,
-        min_index: int = None,
-        max_index: int = None,
-    ):
+        columns: List[str] = Query(None),
+        index_col: Optional[str] = None,
+        min_index: Optional[int] = None,
+        max_index: Optional[int] = None,
+    ) -> StreamingResponse:
         """ Returns pandas.DataFrame.to_dict() for the given dataset
         """
         dataset_file = _dataset_file(name)
@@ -51,11 +51,11 @@ def make_app():
         return response
 
     @app.delete("/datasets")
-    def delete_dataset(name: str):
+    def delete_dataset(name: str) -> None:
         pathlib.Path(_dataset_file(name)).unlink()
 
     @app.get("/datasets")
-    def get_all_datasets():
+    def get_all_datasets() -> List[str]:
         files = pathlib.Path(_dataset_file("")).glob("*")
         return [f.name for f in files]
 
@@ -63,4 +63,4 @@ def make_app():
 
 
 if __name__ == "__main__":
-    uvicorn.run(make_app(), host="0.0.0.0", port=8000)
+    uvicorn.run(make_app(), host="0.0.0.0", port=5007)
