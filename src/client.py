@@ -1,6 +1,8 @@
-import pandas as pd
-from typing import List
 import io
+from typing import List
+
+import pandas as pd
+
 
 class FSClient:
     def __init__(self, httpclient, base_url):
@@ -13,25 +15,25 @@ class FSClient:
         self.c = httpclient
         self.url = base_url
 
-    def _get(self, query):
-        r = self.c.get(self.url + query)
-        assert r.status_code == 200, r.json()
-        return r
-
     def all_datasets(self) -> List[str]:
         """ :returns: list of all datasets names """
         return self._get("datasets").json()
 
     def delete(self, name: str):
-        return self.c.delete(self.url + f"datasets?name={name}")
+        r = self.c.delete(self.url + f"datasets?name={name}")
+        _assert_status_code_200(r)
 
-    def upload_dataframe(self, df: pd.DataFrame, name: str):
+    def upload_dataframe(self, df: pd.DataFrame, name: str) -> None:
         """ Upload a pandas dataframe and save with given name """
-        return self.c.post(
-            self.url + "/datasets/csv", files={"file": (name, io.BytesIO(str.encode(df.to_csv())))}
+        r = self.c.post(
+            self.url + "datasets/csv",
+            files={"file": (name, io.BytesIO(str.encode(df.to_csv())))},
         )
+        _assert_status_code_200(r)
 
-    def get(self, name: str, columns = None, index_col = None, min_index = None, max_index = None):
+    def get(
+        self, name: str, columns=None, index_col=None, min_index=None, max_index=None
+    ):
         """ Get a slice of a dataset as a pandas DataFrame """
         q = f"datasets/csv?name={name}"
         if columns:
@@ -46,3 +48,12 @@ class FSClient:
 
         r = self._get(q)
         return pd.read_csv(io.StringIO(str(r.content, "utf-8")))
+
+    def _get(self, query):
+        r = self.c.get(self.url + query)
+        _assert_status_code_200(r)
+        return r
+
+
+def _assert_status_code_200(r) -> None:
+    assert r.status_code == 200, r.json()

@@ -1,12 +1,9 @@
-import io
-
-import pandas as pd
 import numpy as np
-import requests
+import pandas as pd
 from fastapi.testclient import TestClient
 
+from client import FSClient
 from src.main import make_app
-
 from tests.e2e import e2e
 
 
@@ -25,25 +22,17 @@ def make_awkward_data(nrows=100, ncols=5):
     return df
 
 
-def test_upload_and_download_csv_returns_original_data_with_text_and_nans():
-    df = make_awkward_data(nrows=5)
+def test_upload_and_download_awkward_data_returns_original_data_with_text_and_nans():
     app = make_app()
-    client = TestClient(app)
+    client = FSClient(httpclient=TestClient(app), base_url="")
+    df = make_awkward_data(nrows=5)
     filename = "upload.csv"
 
-    # this mimics how typical web sends csv files
-    r = client.post(
-        "/datasets/csv", files={"file": (filename, io.BytesIO(str.encode(df.to_csv())))}
-    )
-    assert r.status_code == 200, f"Expected 200. Got {r.json()}"
-    r = client.get(f"datasets/csv?name={filename}")
-    assert r.status_code == 200, f"Expected 200. Got {r.json()}"
+    client.upload_dataframe(df=df, name=filename)
+    reloaded_df = client.get(name=filename)
 
-    # mimic download text/csv
-    reloaded_df = pd.read_csv(io.StringIO(str(r.content, "utf-8")))
     expected = df.reset_index()
     pd.testing.assert_frame_equal(reloaded_df, expected)
-
 
 
 def test_e2e():

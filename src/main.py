@@ -3,11 +3,11 @@ import os
 import pathlib
 import typing
 
-from fastapi import FastAPI, File, UploadFile, Query
-from fastapi.responses import StreamingResponse
 import feather
 import pandas as pd
 import uvicorn
+from fastapi import FastAPI, File, Query, UploadFile
+from fastapi.responses import StreamingResponse
 
 
 def make_app():
