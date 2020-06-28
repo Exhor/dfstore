@@ -30,19 +30,19 @@ def e2e(httpclient, url=""):
     df = pd.DataFrame(
         {"t": [0, 1, 2, 3], "number": [1, 2, np.nan, 4], "text": ["a", "b", "c", "d"]}
     )
-    r = c.upload_dataframe(name="e2e.csv", df=df)
-    assert r.status_code == 200, r.json()
+    name = "e2e.csv"
+    c.upload_dataframe(name=name, df=df)
 
     # list all
-    assert "e2e.csv" in c.all_datasets()
+    assert name in c.all_datasets()
 
     # get slice
     cols = ["t", "number"]
     sliced_df = c.get(
-        name="e2e.csv", columns=cols, index_col="t", min_index=2, max_index=4
+        name=name, columns=cols, index_col="t", min_index=2, max_index=4
     )
     pd.testing.assert_frame_equal(sliced_df, df[cols].iloc[2:4].reset_index(drop=True))
 
     # delete
-    c.delete("e2e.csv")
-    assert "e2e.csv" not in c.all_datasets()
+    c.delete(name)
+    assert name not in c.all_datasets()
