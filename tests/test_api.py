@@ -3,7 +3,7 @@ import pandas as pd
 from fastapi.testclient import TestClient
 
 from client import FSClient
-from src.main import make_app
+from src.server import make_app
 from tests.e2e import e2e
 
 

@@ -1,6 +1,7 @@
 import io
 import os
 import pathlib
+from time import sleep
 from typing import List, Optional
 
 import feather
@@ -38,12 +39,31 @@ def make_app() -> FastAPI:
         max_index: Optional[int] = None,
     ) -> StreamingResponse:
         """ Returns pandas.DataFrame.to_dict() for the given dataset
+
+        If columns is specified, only those columns will be returned.
+
+        If index_col, min_index and max_index are specified, then only rows where
+        df[index_col] is between min_index (inclusive) and max_index (exclusive) will
+        be returned.
         """
         dataset_file = _dataset_file(name)
-        df = feather.read_dataframe(dataset_file, columns=columns)
-        if index_col:
+        df = pd.DataFrame()
+
+        # attempt a few times to read the file, needed due to concurrency
+        for attempt in range(10):
+            try:
+                df = feather.read_dataframe(dataset_file, columns=columns)
+            except OSError:
+                sleep(0.1)
+        if len(df) == 0:
+            raise OSError("Unable to read from file system. File missing or empty")
+
+        # if index and min/max are specified, filter accordingly
+        if index_col and min_index and max_index:
             assert df[index_col].dtype.kind in "iuf", "Index col must be integer/float"
             df = df[df[index_col].between(min_index, max_index)]
+
+        # stream response as a csv
         stream = io.StringIO()
         df.to_csv(stream, index=False)
         response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
