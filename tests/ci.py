@@ -14,7 +14,7 @@ try:
 
     # deploy
     # remove previous running
-    os.system("docker rm fsserver")
+    os.system("docker kill fsserver")
     os.system("docker wait fsserver")
     # run
     assert not os.system(
@@ -27,6 +27,10 @@ try:
     # e2e
     e2e(httpclient=requests, url=url)
     print("E2E: OK!")
+
+    # publish (requires manual docker login first)
+    assert not os.system("docker tag fs tcorradi/df-store")
+    os.system("docker push tcorradi/df-store")
 
 except Exception:
     traceback.print_exc()
