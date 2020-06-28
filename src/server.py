@@ -15,7 +15,7 @@ def make_app() -> FastAPI:
     app = FastAPI()
 
     def _dataset_file(filename: str) -> pathlib.Path:
-        root = os.getenv("FILESTORE_FOLDER", str(pathlib.Path.home() / "filestore"))
+        root = os.getenv("FILESTORE_FOLDER", str(pathlib.Path.home() / "fs"))
         return pathlib.Path(root) / filename
 
     @app.get("/")

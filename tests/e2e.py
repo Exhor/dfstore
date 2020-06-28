@@ -3,7 +3,7 @@ from time import sleep
 import numpy as np
 import pandas as pd
 
-from client import FSClient
+from src.client import FSClient
 
 
 def e2e(httpclient, url=""):
