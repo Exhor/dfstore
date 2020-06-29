@@ -15,15 +15,17 @@ def make_app() -> FastAPI:
     app = FastAPI()
 
     def _dataset_file(filename: str) -> pathlib.Path:
+        """ Returns the full path where to store a file """
         root = os.getenv("FILESTORE_FOLDER", str(pathlib.Path.home() / "fs"))
         return pathlib.Path(root) / filename
 
     @app.get("/")
     def get() -> str:
-        return "Hi, Im FeatherStore :)"
+        return "Hi, I'm DF-Store. I live here: https://github.com/Exhor/dfstore"
 
     @app.post("/datasets/csv")
     async def upload_dataset_file(file: UploadFile = File(...)) -> None:
+        """ Upload a CSV and create a dataset from it """
         print(f"Received file {file.filename}")
         df = pd.read_csv(file.file)
         dataset_file = _dataset_file(file.filename)
@@ -71,11 +73,13 @@ def make_app() -> FastAPI:
         return response
 
     @app.delete("/datasets")
-    def delete_dataset(name: str) -> None:
+    async def delete_dataset(name: str) -> None:
+        """ Removes the dataset from storage. Cannot be undone. """
         pathlib.Path(_dataset_file(name)).unlink()
 
     @app.get("/datasets")
-    def get_all_datasets() -> List[str]:
+    async def get_all_datasets() -> List[str]:
+        """ Return a list of all available datasets """
         files = pathlib.Path(_dataset_file("")).glob("*")
         return [f.name for f in files]
 
