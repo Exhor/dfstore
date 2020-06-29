@@ -83,6 +83,8 @@ def make_app() -> FastAPI:
         files = pathlib.Path(_dataset_file("")).glob("*")
         return [f.name for f in files]
 
+    print(f"DF-Store started. Storing files in: {_dataset_file('')}")
+
     return app
 
 
